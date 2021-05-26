@@ -13,6 +13,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  bool isInTurretMode = false;
   void onJoystickEvent(double angle, double distance){
     double x, y;
 
@@ -24,7 +25,14 @@ class MyApp extends StatelessWidget {
   }
 
   void onButtonPress(){
-    print("Turret Mode Engaged!");
+    if (!isInTurretMode){
+      print("Turret Mode Engaged!");
+      isInTurretMode=true;
+    }else{
+      print("Turret Mode Disengaged!");
+      isInTurretMode=false;
+    }
+
 
     //TODO : Send Turret Mode Changed to RPi
   }
