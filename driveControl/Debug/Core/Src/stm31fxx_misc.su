@@ -1,0 +1,6 @@
+stm31fxx_misc.c:15:6:setLeftMotorPWM	16	static
+stm31fxx_misc.c:19:6:setRightMotorPWM	16	static
+stm31fxx_misc.c:23:5:getLeftMotorPWM	4	static
+stm31fxx_misc.c:28:5:getRightMotorPWM	4	static
+stm31fxx_misc.c:34:6:setLeftMotorDirection	16	static
+stm31fxx_misc.c:46:6:setRightMotorDirection	16	static

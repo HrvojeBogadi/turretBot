@@ -2,8 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math';
-import 'dart:io';
-import 'dart:async';
 
 import 'package:flutter_mjpeg/flutter_mjpeg.dart';
 
@@ -67,7 +65,7 @@ class _MyApp extends State<MyAppState>{
           fit: StackFit.expand,
           children: <Widget>[
             Container(
-              color: Colors.amber,
+              color: Colors.blueGrey,
               child: Mjpeg(
                 stream: stream,
                 isLive: true
