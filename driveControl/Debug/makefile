@@ -35,34 +35,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := turretBot
+BUILD_ARTIFACT_NAME := driveControl
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX := 
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME).$(BUILD_ARTIFACT_EXTENSION)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-turretBot.elf \
+driveControl.elf \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-turretBot.list \
+driveControl.list \
 
 OBJCOPY_BIN += \
-turretBot.bin \
+driveControl.bin \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: turretBot.elf secondary-outputs
+main-build: driveControl.elf secondary-outputs
 
 # Tool invocations
-turretBot.elf: $(OBJS) $(USER_OBJS) D:\Development\STM32Workspace\turretBot\STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "turretBot.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"D:\Development\STM32Workspace\turretBot\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="turretBot.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+driveControl.elf: $(OBJS) $(USER_OBJS) /Users/admin/Development/UgRS/turretBot/driveControl/STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "driveControl.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"/Users/admin/Development/UgRS/turretBot/driveControl/STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="driveControl.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -71,13 +71,13 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-turretBot.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "turretBot.list"
+driveControl.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "driveControl.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
-turretBot.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "turretBot.bin"
+driveControl.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "driveControl.bin"
 	@echo 'Finished building: $@'
 	@echo ' '
 

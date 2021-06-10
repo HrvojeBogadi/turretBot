@@ -30,13 +30,16 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f1xx_hal.h"
 
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include "stm32f1xx_misc.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
+enum motorDirection{FORWARD, BACKWARD};
 
 /* USER CODE END ET */
 
@@ -60,22 +63,24 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define motorPWMLeft_Pin GPIO_PIN_1
-#define motorPWMLeft_GPIO_Port GPIOA
-#define motorDriverIN1_Pin GPIO_PIN_2
-#define motorDriverIN1_GPIO_Port GPIOA
-#define motorDriverIN2_Pin GPIO_PIN_3
-#define motorDriverIN2_GPIO_Port GPIOA
-#define motorDriverIN3_Pin GPIO_PIN_5
-#define motorDriverIN3_GPIO_Port GPIOA
-#define motorDriverIN4_Pin GPIO_PIN_6
-#define motorDriverIN4_GPIO_Port GPIOA
-#define motorPWMRight_Pin GPIO_PIN_7
-#define motorPWMRight_GPIO_Port GPIOA
-#define optoInterruptLeft_Pin GPIO_PIN_10
-#define optoInterruptLeft_GPIO_Port GPIOB
-#define optoInterruptRight_Pin GPIO_PIN_11
-#define optoInterruptRight_GPIO_Port GPIOB
+#define RightMotorPWM_Pin GPIO_PIN_8
+#define RightMotorPWM_GPIO_Port GPIOA
+#define LeftMotorPWM_Pin GPIO_PIN_9
+#define LeftMotorPWM_GPIO_Port GPIOA
+#define MotorDriverIN1_Pin GPIO_PIN_10
+#define MotorDriverIN1_GPIO_Port GPIOA
+#define MotorDriverIN2_Pin GPIO_PIN_11
+#define MotorDriverIN2_GPIO_Port GPIOA
+#define MotorDriverIN3_Pin GPIO_PIN_15
+#define MotorDriverIN3_GPIO_Port GPIOA
+#define MotorDriverIN4_Pin GPIO_PIN_3
+#define MotorDriverIN4_GPIO_Port GPIOB
+#define LeftMotorOpto_Pin GPIO_PIN_7
+#define LeftMotorOpto_GPIO_Port GPIOB
+#define LeftMotorOpto_EXTI_IRQn EXTI9_5_IRQn
+#define RightMotorOpto_Pin GPIO_PIN_8
+#define RightMotorOpto_GPIO_Port GPIOB
+#define RightMotorOpto_EXTI_IRQn EXTI9_5_IRQn
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
