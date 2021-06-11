@@ -52,7 +52,7 @@ UART_HandleTypeDef huart2;
 /* USER CODE BEGIN PV */
 
 
-uint8_t RxBuffer[14] = {0};
+uint8_t RxBuffer[18] = {0};
 char TxBuffer[20];
 
 volatile float leftMotorControlValue = 0;
@@ -60,6 +60,9 @@ volatile float rightMotorControlValue = 0;
 
 volatile float leftJoystickValue = 0;
 volatile float rightJoystickValue = 0;
+
+volatile int leftMotorDirection = 0;
+volatile int rightMotorDirection = 0;
 
 char *tempJoystickVal;
 char *tempStrToFloat;
@@ -210,14 +213,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		leftJoystickValue = atof(tempStrToFloat);
 		tempStrToFloat = strtok(NULL, ",");
 		rightJoystickValue = atof(tempStrToFloat);
+		tempStrToFloat = strtok(NULL, ",");
+		leftMotorDirection = atoi(tempStrToFloat);
+		tempStrToFloat = strtok(NULL, ",");
+		rightMotorDirection = atoi(tempStrToFloat);
 
-		if(rightJoystickValue > 0){
-			setRightMotorDirection(FORWARD);
-			setLeftMotorDirection(FORWARD);
-		}else{
-			setRightMotorDirection(BACKWARD);
-			setLeftMotorDirection(BACKWARD);
-		}
+		setLeftMotorDirection(leftMotorDirection);
+		setRightMotorDirection(rightMotorDirection);
 
 		setRightMotorPWM((int)(rightJoystickValue*1000));
 		setLeftMotorPWM((int)(leftJoystickValue*1000));
@@ -232,12 +234,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			setLeftMotorPWM(pwmToSet);
 		}
 
-		sprintf(TxBuffer, "LM: %d, RM: %d\n", pwmToSet, pwmToSet);
-		HAL_UART_Transmit(&huart2, RxBuffer, sizeof(RxBuffer), 100);
-		for(n = 0; n < sizeof(TxBuffer); n++){
-			TxBuffer[n] = 0;
-		}
-
 		/* Uncomment for process identification and PRBS generation
 
 		timeCount++;
@@ -250,10 +246,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 
 		nGapsLeft = 0;
 		nGapsRight = 0;
-		*/
+
 	}
 	if(htim == &htim1){
-		/*
+
 		noMsLeft++;
 		noMsRight++;
 		*/

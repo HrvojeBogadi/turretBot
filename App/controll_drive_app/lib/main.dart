@@ -12,6 +12,7 @@ import 'package:http/http.dart' as http;
 
 final String sendDataIP = "http://192.168.0.23";
 final int sendDataPort = 8081;
+final String stream = "http://192.168.0.23:8080/cam.mjpg";
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,18 +29,17 @@ class MyAppState extends StatefulWidget{
 
 class _MyApp extends State<MyAppState>{
   bool isInTurretMode = false;
-  double xLeft, yLeft, xRight, yRight = 0;
-  String stream = "http://192.168.0.23:8080/cam.mjpg";
-  Mjpeg currentImage;
+  double xLeft = 0, yLeft = 0, xRight = 0, yRight = 0;
+
   
-  Future<http.Response> sendHTTPInfo(String info) async{
+  Future<http.Response> sendHTTPInfo() async{
     return await http.post(
       Uri.parse("$sendDataIP:$sendDataPort"),
       headers: 
         {
           'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
         },
-        body: info
+        body: "$xLeft:$yRight:$isInTurretMode"
     );
   }
 
@@ -47,16 +47,16 @@ class _MyApp extends State<MyAppState>{
     yRight = distance * cos(angle/(180) * pi);
     xRight = distance * sin(angle/(180) * pi);
 
+    sendHTTPInfo();
     print("Right Joystick: X Cartesian: $xRight, Y Cartesian: $yRight");
-    sendHTTPInfo("Right Joystick Position:$yRight");
   }
 
   void onJoystickLeftEvent(double angle, double distance){
     yLeft = distance * cos(angle/(180) * pi);
     xLeft = distance * sin(angle/(180) * pi);
 
+    sendHTTPInfo();
     print("Left Joystick: X Cartesian: $xLeft, Y Cartesian: $yLeft");
-    sendHTTPInfo("Right Joystick Position:$xLeft");
   }
 
   void onButtonPress(){
@@ -67,7 +67,7 @@ class _MyApp extends State<MyAppState>{
       print("Turret Mode Disengaged!");
       isInTurretMode=false;
     }
-    sendHTTPInfo("Turret Mode:$isInTurretMode");
+    sendHTTPInfo();
   }
 
   @override

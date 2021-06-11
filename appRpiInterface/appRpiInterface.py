@@ -1,6 +1,8 @@
 #!/usr/bin/python
+
 from http import server
 from http.server import BaseHTTPRequestHandler,HTTPServer
+import movementControl
 
 serverPort = 8081
 
@@ -13,7 +15,7 @@ class connectionHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         content_length = int(self.headers['Content-Length'])
         post_data = self.rfile.read(content_length)
-        print(post_data)
+        movementControl.decodeHTTPData(post_data)
         try:
             self.send_response(200)
         except KeyboardInterrupt:
