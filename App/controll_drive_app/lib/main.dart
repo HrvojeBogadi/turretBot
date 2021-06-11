@@ -1,23 +1,20 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math';
-import 'dart:io';
 
 import 'package:flutter_mjpeg/flutter_mjpeg.dart';
-
 import 'package:control_pad/control_pad.dart';
+import 'package:http/http.dart' as http;
 
 
-final String sendDataIP = "192.168.0.23";
+final String sendDataIP = "http://192.168.0.23";
 final int sendDataPort = 8081;
-
-Socket socket;
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
-
-  socket = await Socket.connect("sendDataIP", sendDataPort);
 
   SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeRight])
     .then((value) => runApp(MyAppState()));
@@ -32,16 +29,26 @@ class MyAppState extends StatefulWidget{
 class _MyApp extends State<MyAppState>{
   bool isInTurretMode = false;
   double xLeft, yLeft, xRight, yRight = 0;
-  double resWidth = 1200;
-  double resHeight = 480;
   String stream = "http://192.168.0.23:8080/cam.mjpg";
+  Mjpeg currentImage;
   
+  Future<http.Response> sendHTTPInfo(String info) async{
+    return await http.post(
+      Uri.parse("$sendDataIP:$sendDataPort"),
+      headers: 
+        {
+          'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        },
+        body: info
+    );
+  }
+
   void onJoystickRightEvent(double angle, double distance){
     yRight = distance * cos(angle/(180) * pi);
     xRight = distance * sin(angle/(180) * pi);
 
     print("Right Joystick: X Cartesian: $xRight, Y Cartesian: $yRight");
-    socket.write("Right Joystick Position:$yRight");
+    sendHTTPInfo("Right Joystick Position:$yRight");
   }
 
   void onJoystickLeftEvent(double angle, double distance){
@@ -49,7 +56,7 @@ class _MyApp extends State<MyAppState>{
     xLeft = distance * sin(angle/(180) * pi);
 
     print("Left Joystick: X Cartesian: $xLeft, Y Cartesian: $yLeft");
-    socket.write("Right Joystick Position:$xLeft");
+    sendHTTPInfo("Right Joystick Position:$xLeft");
   }
 
   void onButtonPress(){
@@ -60,7 +67,7 @@ class _MyApp extends State<MyAppState>{
       print("Turret Mode Disengaged!");
       isInTurretMode=false;
     }
-    socket.write("Turret Mode:$isInTurretMode");
+    sendHTTPInfo("Turret Mode:$isInTurretMode");
   }
 
   @override
@@ -72,8 +79,9 @@ class _MyApp extends State<MyAppState>{
             Container(
               color: Colors.blueGrey,
               child: Mjpeg(
-                stream: stream,
-                isLive: true
+                stream: stream, 
+                isLive: true,
+                fit: BoxFit.fill,
               )
             ),
             
