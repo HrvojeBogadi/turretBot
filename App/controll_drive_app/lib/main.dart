@@ -2,17 +2,22 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math';
+import 'dart:io';
 
 import 'package:flutter_mjpeg/flutter_mjpeg.dart';
 
 import 'package:control_pad/control_pad.dart';
 
 
-final String url = "192.168.0.23";
+final String sendDataIP = "192.168.0.23";
+final int sendDataPort = 8081;
+
+Socket socket;
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
 
+  socket = await Socket.connect("sendDataIP", sendDataPort);
 
   SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeRight])
     .then((value) => runApp(MyAppState()));
@@ -36,7 +41,7 @@ class _MyApp extends State<MyAppState>{
     xRight = distance * sin(angle/(180) * pi);
 
     print("Right Joystick: X Cartesian: $xRight, Y Cartesian: $yRight");
-    //socket.write("Right Joystick Position:$yRight");
+    socket.write("Right Joystick Position:$yRight");
   }
 
   void onJoystickLeftEvent(double angle, double distance){
@@ -44,7 +49,7 @@ class _MyApp extends State<MyAppState>{
     xLeft = distance * sin(angle/(180) * pi);
 
     print("Left Joystick: X Cartesian: $xLeft, Y Cartesian: $yLeft");
-    //socket.write("Right Joystick Position:$xLeft");
+    socket.write("Right Joystick Position:$xLeft");
   }
 
   void onButtonPress(){
@@ -55,7 +60,7 @@ class _MyApp extends State<MyAppState>{
       print("Turret Mode Disengaged!");
       isInTurretMode=false;
     }
-    //socket.write("Turret Mode:$isInTurretMode");
+    socket.write("Turret Mode:$isInTurretMode");
   }
 
   @override
