@@ -1,9 +1,0 @@
-NOTES :
-
-Drive control:
-
-Motor 1 and 2 control
-	- Pins 1,2 and 3,4 respectively
-	- Enable A and Enable B for PWM signal
-	- clockwise HIGH,LOW;
-	-counter-clokwise LOW,HIGH;

@@ -36,6 +36,8 @@
 /* USER CODE BEGIN PD */
 #define NGAPS 20
 #define Ts 0.1
+
+#define NSAMPLES 5
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -58,8 +60,8 @@ char TxBuffer[20];
 volatile float leftMotorControlValue = 0;
 volatile float rightMotorControlValue = 0;
 
-volatile float leftJoystickValue = 0;
-volatile float rightJoystickValue = 0;
+volatile float leftMotorValue = 0;
+volatile float rightMotorValue = 0;
 
 volatile int leftMotorDirection = 0;
 volatile int rightMotorDirection = 0;
@@ -78,6 +80,9 @@ volatile float speedRight = 0;
 volatile float speedPerSecLeft = 0;
 volatile float speedPerSecRight = 0;
 
+int leftSamples[NSAMPLES] = {0};
+int rightSamples[NSAMPLES] = {0};
+
 volatile int randPWM = 0;	//Determine value of current period of PRBS
 volatile uint16_t randT = 0;	//Determine length of current period of PRBS
 const int upperLimitRandT = 14;
@@ -89,6 +94,8 @@ volatile int noMsLeft = 0;
 volatile int noMsRight = 0;
 
 int n = 0;
+volatile int i = 0;
+volatile int j = 0;
 
 /*Controlling motors on joystick input*/
 /* USER CODE END PV */
@@ -107,8 +114,8 @@ static void MX_TIM2_Init(void);
 /* USER CODE BEGIN 0 */
 void prbs(){
 	//Set Workpoint Value at 50% PWM -- PRBS to +/- 50% PWM
-	setLeftMotorDirection(0);
-	setRightMotorDirection(1);
+	setLeftMotorDirection(FORWARD);
+	setRightMotorDirection(FORWARD);
 	if(timeCount == randT){
 		timeCount = 0;
 		randT = (uint16_t)((rand() % (upperLimitRandT - lowerLimitRandT + 1)) + lowerLimitRandT);
@@ -125,7 +132,7 @@ void prbs(){
 		}
 
 	}
-	sprintf(TxBuffer,"%d,%d,%d,%d\n", (int)(speedPerSecLeft*100), (int)getLeftMotorPWM(), (int)(speedPerSecLeft*100), (int)getRightMotorPWM());
+	sprintf(TxBuffer,"%d,%d,%d,%d\r\t", (int)(speedPerSecLeft*100), (int)getLeftMotorPWM(), (int)(speedPerSecRight*100), (int)getRightMotorPWM());
 	if(HAL_UART_Transmit(&huart2, (uint8_t *)TxBuffer, 20, 100)!=HAL_OK)
 		Error_Handler();
 	/*Necessary because HAL library leaves bytes in buffer ; i.e. bytes are sent out
@@ -178,7 +185,7 @@ int main(void)
 	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1); // Right Motor PWM Control
 	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2); // Left Motor PWM Control
 
-	HAL_UART_Receive_IT(&huart2, RxBuffer, sizeof(RxBuffer));
+
 
 	/* USER CODE END 2 */
 
@@ -186,6 +193,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 	while (1)
 	{
+		HAL_UART_Receive_IT(&huart2, RxBuffer, sizeof(RxBuffer));
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -195,80 +203,87 @@ int main(void)
 
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
-	HAL_UART_Receive_IT(&huart2, RxBuffer, sizeof(RxBuffer));
+	//sprintf(TxBuffer,"%s\n", RxBuffer);
+	//
+	//HAL_UART_Transmit(&huart2, (uint8_t* )RxBuffer, sizeof(RxBuffer), 1000);
+
+	tempJoystickVal = (char *)RxBuffer;
+	tempStrToFloat = strtok(tempJoystickVal, ",");
+	leftMotorValue = atof(tempStrToFloat);
+	tempStrToFloat = strtok(NULL, ",");
+	rightMotorValue = atof(tempStrToFloat);
+	tempStrToFloat = strtok(NULL, ",");
+	leftMotorDirection = atoi(tempStrToFloat);
+	tempStrToFloat = strtok(NULL, ",");
+	rightMotorDirection = atoi(tempStrToFloat);
 }
 
 
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	/* Every Ts interrupt */
-	int pwmToSet = 0;
+	//int avgMs = 0;
+	//int pwmToSet = 0;
+
 	if(htim == &htim2){
+		/* Uncomment for PRBS and regulator synthesis
 
-		//prbs(); //Process identification
+		timeCount++;
 
+		for(int i = 0; i < NSAMPLES; i++){
+			avgMs += rightSamples[i];
+		}
+		avgMs = avgMs / NSAMPLES;
 
-		tempJoystickVal = (char *)RxBuffer;
-		tempStrToFloat = strtok(tempJoystickVal, ",");
-		leftJoystickValue = atof(tempStrToFloat);
-		tempStrToFloat = strtok(NULL, ",");
-		rightJoystickValue = atof(tempStrToFloat);
-		tempStrToFloat = strtok(NULL, ",");
-		leftMotorDirection = atoi(tempStrToFloat);
-		tempStrToFloat = strtok(NULL, ",");
-		rightMotorDirection = atoi(tempStrToFloat);
+		speedRight = (float)avgMs * (float)NGAPS / 1000.00; //seconds per revolution
+		speedPerSecRight = 1.00 / speedRight; //revolutions per second
+
+		for(int i = 0; i < NSAMPLES; i++){
+			avgMs += leftSamples[i];
+		}
+		avgMs = avgMs / NSAMPLES;
+
+		speedLeft = (float)avgMs * (float)NGAPS / 1000.00; //seconds per revolution
+		speedPerSecLeft = 1.00 / speedLeft; //revolutions per second
+
+		prbs();
+		continue;
+
+		*/
 
 		setLeftMotorDirection(leftMotorDirection);
 		setRightMotorDirection(rightMotorDirection);
 
-		setRightMotorPWM((int)(rightJoystickValue*1000));
-		setLeftMotorPWM((int)(leftJoystickValue*1000));
-
-		if(leftJoystickValue > 0){
-			pwmToSet = getRightMotorPWM();
-			pwmToSet -= pwmToSet*leftJoystickValue;
-			setRightMotorPWM(pwmToSet);
-		}else if(leftJoystickValue < 0){
-			pwmToSet = getLeftMotorPWM();
-			pwmToSet -= pwmToSet*leftJoystickValue;
-			setLeftMotorPWM(pwmToSet);
-		}
-
-		/* Uncomment for process identification and PRBS generation
-
-		timeCount++;
-
-		speedLeft = (float)nGapsLeft / (float)NGAPS; //Number of revolutions per Ts
-		speedPerSecLeft = speedLeft / (float)Ts; //Number of revolutions per second
-
-		speedRight = (float)nGapsRight / (float)NGAPS; //Number of revolutions per Ts
-		speedPerSecRight = speedRight / (float)Ts; //Number of revolutions per second
-
-		nGapsLeft = 0;
-		nGapsRight = 0;
+		setLeftMotorPWM(leftMotorValue * 100);
+		setRightMotorPWM(rightMotorValue * 100);
 
 	}
 	if(htim == &htim1){
 
 		noMsLeft++;
 		noMsRight++;
-		*/
 	}
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 	if(GPIO_Pin == RightMotorOpto_Pin){
-
 		nGapsRight++;
-		noMsRight = 0;
 
+		if(i >= NSAMPLES) i = 0;
+		rightSamples[i] = noMsRight;
+
+		noMsRight = 0;
+		i++;
 	}
 
 	if(GPIO_Pin == LeftMotorOpto_Pin){
-
-
 		nGapsLeft++;
+
+		if(j >= NSAMPLES) j = 0;
+		rightSamples[j] = noMsLeft;
+
 		noMsLeft = 0;
+		j++;
 	}
 }
 
@@ -410,7 +425,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 719;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 4999; // 0.1 SECOND TS --------------------- //
+  htim2.Init.Period = 4999; // 0.05 SECOND TS --------------------- //
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)

@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,9 +8,9 @@ import 'package:control_pad/control_pad.dart';
 import 'package:http/http.dart' as http;
 
 
-final String sendDataIP = "http://192.168.0.23";
+final String sendDataIP = "http://192.168.0.1";
 final int sendDataPort = 8081;
-final String stream = "http://192.168.0.23:8080/cam.mjpg";
+final String stream = "http://192.168.0.1:8080/cam.mjpg";
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,8 +30,8 @@ class _MyApp extends State<MyAppState>{
   double xLeft = 0, yLeft = 0, xRight = 0, yRight = 0;
 
   
-  Future<http.Response> sendHTTPInfo() async{
-    return await http.post(
+  Future<void> sendHTTPInfo() async{
+    final http.Response response = await http.post(
       Uri.parse("$sendDataIP:$sendDataPort"),
       headers: 
         {
@@ -41,6 +39,13 @@ class _MyApp extends State<MyAppState>{
         },
         body: "$xLeft:$yRight:$isInTurretMode"
     );
+
+    if(response.statusCode == 200){
+      return;
+    }else{
+      print("? - UNHANDELED EXCEPTION - ?");
+      return;
+    }
   }
 
   void onJoystickRightEvent(double angle, double distance){
@@ -88,7 +93,7 @@ class _MyApp extends State<MyAppState>{
             Container(
               alignment: AlignmentDirectional.bottomStart,
               child: Container(
-                height: 125,
+                height: 200,
                 width: 200,
                 margin: EdgeInsets.only(left: 25, bottom: 5),
                 child: JoystickView(
@@ -104,7 +109,7 @@ class _MyApp extends State<MyAppState>{
             Container(
               alignment: AlignmentDirectional.bottomEnd,
               child: Container(
-                height: 125,
+                height: 200,
                 width: 200,
                 margin: EdgeInsets.only(right: 25, bottom: 5),
                 child: JoystickView(
@@ -129,7 +134,7 @@ class _MyApp extends State<MyAppState>{
                   primary: Colors.green,
                 ),
               ),
-            )
+            ),
           ],
         ),
     );

@@ -1,0 +1,15 @@
+#  Documents  #
+####################
+Documents/*.key
+Documents/*.docx
+Documents/src/
+Documents/UML
+
+
+#  OS generated files  #
+####################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
