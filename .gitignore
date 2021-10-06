@@ -4,6 +4,7 @@ Documents/*.key
 Documents/*.docx
 Documents/src/
 Documents/UML
+/Documents
 
 
 #  OS generated files  #
