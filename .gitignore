@@ -4,7 +4,7 @@ Documents/*.key
 Documents/*.docx
 Documents/src/
 Documents/UML
-/Documents
+Documents
 
 
 #  OS generated files  #
@@ -14,4 +14,3 @@ Documents/UML
 ._*
 .Spotlight-V100
 .Trashes
-.gitignore
